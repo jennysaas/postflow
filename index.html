@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PostFlow — Scheduled Content Changes for WordPress</title>
+    <meta name="description" content="Schedule post status changes, content updates, and category moves in WordPress. Automate your editorial workflow. Free on WordPress.org.">
+    <meta property="og:title" content="PostFlow — Schedule Any Content Change in WordPress">
+    <meta property="og:description" content="Schedule posts to unpublish, move categories, update content, or change status — all automatically. Editorial automation for WordPress.">
+    <meta property="og:type" content="website">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #0D9488;
+            --primary-dark: #0F766E;
+            --primary-light: #F0FDFA;
+            --green: #059669;
+            --green-light: #D1FAE5;
+            --red: #DC2626;
+            --amber: #D97706;
+            --gray-50: #F9FAFB;
+            --gray-100: #F3F4F6;
+            --gray-200: #E5E7EB;
+            --gray-500: #6B7280;
+            --gray-700: #374151;
+            --gray-900: #111827;
+        }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; color: var(--gray-900); line-height: 1.6; background: #fff; }
+        nav { padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; }
+        .logo { font-weight: 800; font-size: 1.5rem; color: var(--primary); text-decoration: none; }
+        .logo span { color: var(--gray-900); }
+        .nav-right { display: flex; align-items: center; gap: 1.5rem; }
+        .nav-link { color: var(--gray-700); text-decoration: none; font-weight: 500; font-size: 0.95rem; }
+        .nav-link:hover { color: var(--primary); }
+        .nav-cta { background: var(--primary); color: #fff; padding: 0.6rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: background 0.2s; }
+        .nav-cta:hover { background: var(--primary-dark); }
+        .hero { max-width: 1200px; margin: 0 auto; padding: 4rem 2rem 2rem; text-align: center; }
+        .badge { display: inline-flex; align-items: center; gap: 0.4rem; background: var(--primary-light); border: 1px solid #99F6E4; color: var(--primary-dark); font-weight: 600; font-size: 0.85rem; padding: 0.35rem 1rem; border-radius: 100px; margin-bottom: 1.5rem; }
+        .hero h1 { font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 800; line-height: 1.15; margin-bottom: 1.5rem; letter-spacing: -0.02em; }
+        .hero h1 .highlight { background: linear-gradient(135deg, var(--primary), #0F766E); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .hero p { font-size: 1.2rem; color: var(--gray-500); max-width: 660px; margin: 0 auto 2rem; }
+        .hero-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+        .btn-primary { background: var(--primary); color: #fff; padding: 0.85rem 2rem; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 1.1rem; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.5rem; }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(13,148,136,0.3); }
+        .btn-secondary { background: var(--gray-100); color: var(--gray-700); padding: 0.85rem 2rem; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 1.1rem; transition: all 0.2s; }
+        .btn-secondary:hover { background: var(--gray-200); }
+        .price-note { margin-top: 1rem; font-size: 0.9rem; color: var(--gray-500); }
+        .price-note strong { color: var(--gray-700); }
+        .stats-bar { max-width: 1000px; margin: 2.5rem auto 0; display: flex; justify-content: center; gap: 3rem; flex-wrap: wrap; padding: 2rem; background: var(--gray-50); border-radius: 16px; border: 1px solid var(--gray-200); }
+        .stat { text-align: center; }
+        .stat .number { font-size: 2rem; font-weight: 800; color: var(--primary); }
+        .stat .label { font-size: 0.85rem; color: var(--gray-500); font-weight: 500; }
+        .stat.danger .number { color: var(--red); }
+        .trust-bar { display: flex; justify-content: center; gap: 2rem; padding: 2rem; flex-wrap: wrap; }
+        .trust-item { display: flex; align-items: center; gap: 0.5rem; color: var(--gray-500); font-size: 0.9rem; font-weight: 500; }
+        .trust-item .check { color: var(--green); font-weight: 700; }
+        .problem { background: var(--gray-900); color: #fff; padding: 4rem 2rem; }
+        .problem-inner { max-width: 800px; margin: 0 auto; text-align: center; }
+        .problem h2 { font-size: 2rem; font-weight: 800; margin-bottom: 1rem; }
+        .problem p { color: #9CA3AF; font-size: 1.1rem; margin-bottom: 1.5rem; line-height: 1.7; }
+        .problem-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-top: 2rem; text-align: left; }
+        .problem-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 1.5rem; }
+        .problem-card .icon { font-size: 1.5rem; margin-bottom: 0.75rem; }
+        .problem-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
+        .problem-card p { font-size: 0.9rem; color: #9CA3AF; margin: 0; }
+        .features { max-width: 1200px; margin: 0 auto; padding: 4rem 2rem; }
+        .features h2 { text-align: center; font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; }
+        .features .subtitle { text-align: center; color: var(--gray-500); font-size: 1.1rem; margin-bottom: 3rem; }
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; }
+        .feature-card { background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 16px; padding: 2rem; transition: all 0.2s; }
+        .feature-card:hover { border-color: var(--primary); box-shadow: 0 4px 12px rgba(13,148,136,0.08); }
+        .feature-icon { width: 48px; height: 48px; background: var(--primary-light); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; font-size: 1.5rem; }
+        .feature-card h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .feature-card p { color: var(--gray-500); font-size: 0.95rem; }
+        .feature-card .pro-badge { display: inline-block; background: var(--primary); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 4px; margin-left: 0.5rem; vertical-align: middle; }
+        .comparison { max-width: 900px; margin: 0 auto; padding: 4rem 2rem; }
+        .comparison h2 { text-align: center; font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; }
+        .comparison .subtitle { text-align: center; color: var(--gray-500); font-size: 1.1rem; margin-bottom: 2.5rem; }
+        .comparison-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+        .comparison-table th { text-align: left; padding: 0.75rem 1rem; background: var(--gray-50); border-bottom: 2px solid var(--gray-200); font-weight: 700; }
+        .comparison-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--gray-100); }
+        .comparison-table .alt-col { background: var(--primary-light); font-weight: 600; }
+        .comparison-table .yes { color: var(--green); font-weight: 700; }
+        .comparison-table .no { color: var(--red); }
+        .comparison-table .meh { color: var(--amber); }
+        .privacy { background: linear-gradient(135deg, #134E4A, #0F172A); color: #fff; padding: 4rem 2rem; text-align: center; }
+        .privacy-inner { max-width: 700px; margin: 0 auto; }
+        .privacy h2 { font-size: 2rem; font-weight: 800; margin-bottom: 1rem; }
+        .privacy p { color: #94A3B8; font-size: 1.1rem; margin-bottom: 2rem; }
+        .privacy-badges { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+        .privacy-badge { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); padding: 0.7rem 1.5rem; border-radius: 100px; font-weight: 600; font-size: 0.9rem; }
+        .pricing { max-width: 950px; margin: 0 auto; padding: 4rem 2rem; text-align: center; }
+        .pricing h2 { font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; }
+        .pricing .subtitle { color: var(--gray-500); font-size: 1.1rem; margin-bottom: 3rem; }
+        .pricing-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; }
+        .pricing-card { border: 2px solid var(--gray-200); border-radius: 16px; padding: 2rem; text-align: left; }
+        .pricing-card.featured { border-color: var(--primary); position: relative; }
+        .pricing-card.featured::before { content: "Most Popular"; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--primary); color: #fff; padding: 0.2rem 1rem; border-radius: 100px; font-size: 0.8rem; font-weight: 700; }
+        .pricing-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .pricing-card .price { font-size: 2.5rem; font-weight: 800; margin-bottom: 0.25rem; }
+        .pricing-card .price span { font-size: 1rem; font-weight: 500; color: var(--gray-500); }
+        .pricing-card .period { color: var(--gray-500); font-size: 0.9rem; margin-bottom: 1.5rem; }
+        .pricing-card .savings { color: var(--green); font-weight: 600; font-size: 0.85rem; }
+        .pricing-card ul { list-style: none; margin-bottom: 1.5rem; }
+        .pricing-card ul li { padding: 0.35rem 0; font-size: 0.95rem; color: var(--gray-700); display: flex; align-items: center; gap: 0.5rem; }
+        .pricing-card ul li::before { content: "\2713"; color: var(--green); font-weight: 700; }
+        .pricing-card .btn-primary { display: block; text-align: center; width: 100%; font-size: 1rem; padding: 0.75rem; }
+        .pricing-note { margin-top: 2rem; font-size: 0.9rem; color: var(--gray-500); background: var(--green-light); padding: 1rem; border-radius: 10px; display: inline-block; }
+        .pricing-note strong { color: var(--green); }
+        .audience { background: var(--gray-50); padding: 4rem 2rem; border-top: 1px solid var(--gray-200); }
+        .audience-inner { max-width: 1000px; margin: 0 auto; }
+        .audience h2 { text-align: center; font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; }
+        .audience .subtitle { text-align: center; color: var(--gray-500); font-size: 1.1rem; margin-bottom: 2.5rem; }
+        .audience-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+        .audience-card { background: #fff; border: 1px solid var(--gray-200); border-radius: 16px; padding: 2rem; }
+        .audience-card .emoji { font-size: 2rem; margin-bottom: 0.75rem; }
+        .audience-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .audience-card p { color: var(--gray-500); font-size: 0.95rem; }
+        .faq { max-width: 700px; margin: 0 auto; padding: 4rem 2rem; }
+        .faq h2 { text-align: center; font-size: 2rem; font-weight: 800; margin-bottom: 2rem; }
+        .faq-item { border-bottom: 1px solid var(--gray-200); padding: 1.25rem 0; }
+        .faq-item h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .faq-item p { color: var(--gray-500); font-size: 0.95rem; }
+        .final-cta { background: var(--primary); color: #fff; padding: 4rem 2rem; text-align: center; }
+        .final-cta h2 { font-size: 2rem; font-weight: 800; margin-bottom: 1rem; }
+        .final-cta p { color: rgba(255,255,255,0.8); font-size: 1.1rem; margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto; }
+        .btn-white { background: #fff; color: var(--primary); padding: 0.85rem 2.5rem; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 1.1rem; transition: all 0.2s; display: inline-block; }
+        .btn-white:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        footer { text-align: center; padding: 2rem; color: var(--gray-500); font-size: 0.85rem; border-top: 1px solid var(--gray-200); }
+        footer a { color: var(--primary); text-decoration: none; }
+        @media (max-width: 640px) {
+            .hero { padding: 2rem 1.5rem; }
+            .features-grid, .pricing-cards, .audience-grid { grid-template-columns: 1fr; }
+            .stats-bar { gap: 1.5rem; }
+            .nav-right .nav-link { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="#" class="logo">Post<span>Flow</span></a>
+        <div class="nav-right">
+            <a href="#features" class="nav-link">Features</a>
+            <a href="#pricing" class="nav-link">Pricing</a>
+            <a href="#faq" class="nav-link">FAQ</a>
+            <a href="#pricing" class="nav-cta">Get PostFlow Free</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="badge">&#128197; Editorial Automation &middot; Privacy-First &middot; No Account Required</div>
+        <h1>Schedule any content change<br><span class="highlight">not just publishing</span></h1>
+        <p>WordPress lets you schedule posts to publish. But what about unpublishing? Moving categories? Updating content? PostFlow lets you schedule any change to any post — automatically.</p>
+        <div class="hero-buttons">
+            <!-- TODO: Replace with actual WordPress.org plugin URL -->
+            <a href="#" class="btn-primary">&#128229; Free on WordPress.org</a>
+            <a href="#pricing" class="btn-secondary">See Pro Features</a>
+        </div>
+        <p class="price-note">Free forever &middot; No account required &middot; <strong>Pro from $3.99/mo</strong></p>
+    </section>
+
+    <div class="stats-bar">
+        <div class="stat">
+            <div class="number">&#8734;</div>
+            <div class="label">scheduled changes you can queue</div>
+        </div>
+        <div class="stat danger">
+            <div class="number">0</div>
+            <div class="label">ways to schedule unpublishing in core WP</div>
+        </div>
+        <div class="stat">
+            <div class="number">24/7</div>
+            <div class="label">automated — no manual intervention</div>
+        </div>
+    </div>
+
+    <div class="trust-bar">
+        <div class="trust-item"><span class="check">&#10003;</span> No account required</div>
+        <div class="trust-item"><span class="check">&#10003;</span> No external services</div>
+        <div class="trust-item"><span class="check">&#10003;</span> Uses WordPress cron</div>
+        <div class="trust-item"><span class="check">&#10003;</span> GDPR compliant</div>
+    </div>
+
+    <section class="problem">
+        <div class="problem-inner">
+            <h2>WordPress scheduling is stuck in 2005</h2>
+            <p>You can schedule a post to publish. That's it. Need to unpublish a seasonal promotion? Move posts between categories on a schedule? Update content automatically? You're on your own — unless you have PostFlow.</p>
+            <div class="problem-grid">
+                <div class="problem-card">
+                    <div class="icon">&#128337;</div>
+                    <h3>Can't schedule unpublishing</h3>
+                    <p>Temporary announcements, seasonal content, limited-time offers — they all need manual cleanup. Or a 3am alarm.</p>
+                </div>
+                <div class="problem-card">
+                    <div class="icon">&#128221;</div>
+                    <h3>Manual content updates</h3>
+                    <p>Pricing changes on January 1st? Event details that update after the event? You have to remember to do it manually.</p>
+                </div>
+                <div class="problem-card">
+                    <div class="icon">&#128736;&#65039;</div>
+                    <h3>No workflow automation</h3>
+                    <p>Moving posts from "Featured" to "Archive" categories, changing statuses after review periods — all manual busywork.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <h2>Schedule it. Forget it. It just works.</h2>
+        <p class="subtitle">Automate the content changes you're doing manually today.</p>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">&#128260;</div>
+                <h3>Schedule Status Changes</h3>
+                <p>Schedule posts to move between any status — publish to draft, draft to pending, pending to publish. Any transition, any time.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#128197;</div>
+                <h3>Basic Scheduling</h3>
+                <p>Set a date and time for any change. PostFlow uses WordPress cron to execute it automatically. Reliable and lightweight.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#128221;</div>
+                <h3>Content Updates <span class="pro-badge">PRO</span></h3>
+                <p>Schedule content changes — update pricing, swap out seasonal messaging, change featured images. All automatic.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#128193;</div>
+                <h3>Category Moves <span class="pro-badge">PRO</span></h3>
+                <p>Automatically move posts between categories on a schedule. Perfect for "Featured → Archive" workflows.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#128257;</div>
+                <h3>Bulk Scheduling <span class="pro-badge">PRO</span></h3>
+                <p>Schedule changes for dozens of posts at once. Recurring rules let you automate repeating workflows.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#128202;</div>
+                <h3>Content Versioning <span class="pro-badge">PRO</span></h3>
+                <p>Keep track of scheduled content versions. See what will change and when. Rollback if needed. Email notifications keep you informed.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="comparison">
+        <h2>Free vs Pro</h2>
+        <p class="subtitle">Free handles basic scheduling. Pro automates your entire workflow.</p>
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>Feature</th>
+                    <th class="alt-col">Free</th>
+                    <th>Pro</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><strong>Schedule status changes</strong></td><td class="alt-col yes">&#10003;</td><td class="yes">&#10003;</td></tr>
+                <tr><td><strong>Basic date/time scheduling</strong></td><td class="alt-col yes">&#10003;</td><td class="yes">&#10003;</td></tr>
+                <tr><td><strong>Visual schedule calendar</strong></td><td class="alt-col yes">&#10003;</td><td class="yes">&#10003;</td></tr>
+                <tr><td><strong>Content updates</strong></td><td class="alt-col no">&#10007;</td><td class="yes">&#10003;</td></tr>
+                <tr><td><strong>Category moves</strong></td><td class="alt-col no">&#10007;</td><td class="yes">&#10003;</td></tr>
+                <tr><td><strong>Bulk scheduling</strong></td><td class="alt-col no">&#10007;</td><td class="yes">&#10003;</td></tr>
+                <tr><td><strong>Recurring rules</strong></td><td class="alt-col no">&#10007;</td><td class="yes">&#10003;</td></tr>
+                <tr><td><strong>Content versioning</strong></td><td class="alt-col no">&#10007;</td><td class="yes">&#10003;</td></tr>
+                <tr><td><strong>Email notifications</strong></td><td class="alt-col no">&#10007;</td><td class="yes">&#10003;</td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section class="privacy">
+        <div class="privacy-inner">
+            <h2>&#128274; No cloud. No external services. Just WordPress.</h2>
+            <p>PostFlow uses WordPress's built-in cron system. All scheduled changes are stored in your database and executed locally. No data leaves your server, no external APIs, no tracking.</p>
+            <div class="privacy-badges">
+                <span class="privacy-badge">&#128274; No Account Needed</span>
+                <span class="privacy-badge">&#128225; No External Calls</span>
+                <span class="privacy-badge">&#128683; Zero Tracking</span>
+                <span class="privacy-badge">&#128190; WordPress Cron Native</span>
+                <span class="privacy-badge">&#127466;&#127482; GDPR Compliant</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="pricing" id="pricing">
+        <h2>Automate your editorial workflow</h2>
+        <p class="subtitle">Start free. Upgrade when you need advanced automation.</p>
+        <div class="pricing-cards">
+            <div class="pricing-card">
+                <h3>Free</h3>
+                <div class="price">$0</div>
+                <div class="period">Forever &middot; No credit card</div>
+                <ul>
+                    <li>Schedule status changes</li>
+                    <li>Basic date/time scheduling</li>
+                    <li>Visual schedule calendar</li>
+                    <li>WordPress-native</li>
+                    <li>100% private</li>
+                </ul>
+                <!-- TODO: Replace with actual WordPress.org plugin URL -->
+                <a href="#" class="btn-primary" style="background:var(--gray-700);">Download Free</a>
+            </div>
+            <div class="pricing-card">
+                <h3>Monthly</h3>
+                <div class="price">$3.99 <span>/mo</span></div>
+                <div class="period">Billed monthly &middot; Cancel anytime</div>
+                <ul>
+                    <li>Everything in Free</li>
+                    <li>Content updates</li>
+                    <li>Category moves</li>
+                    <li>Bulk scheduling</li>
+                    <li>Recurring rules</li>
+                    <li>Email notifications</li>
+                </ul>
+                <!-- TODO: Replace with actual Freemius checkout URL (product ID, plan ID) -->
+                <a href="#" class="btn-primary">Get Pro Monthly</a>
+            </div>
+            <div class="pricing-card featured">
+                <h3>Annual</h3>
+                <div class="price">$39.99 <span>/yr</span></div>
+                <div class="period">Billed annually</div>
+                <div class="savings">Save 16% vs monthly</div>
+                <ul>
+                    <li>Everything in Monthly</li>
+                    <li>Content versioning</li>
+                    <li>All future updates</li>
+                    <li>Priority support</li>
+                </ul>
+                <!-- TODO: Replace with actual Freemius checkout URL -->
+                <a href="#" class="btn-primary">Get Pro Annual</a>
+            </div>
+            <div class="pricing-card">
+                <h3>Lifetime</h3>
+                <div class="price">$99.99</div>
+                <div class="period">One-time payment &middot; Forever</div>
+                <div class="savings">Best long-term value</div>
+                <ul>
+                    <li>Everything in Annual</li>
+                    <li>Lifetime updates</li>
+                    <li>Lifetime support</li>
+                    <li>No recurring fees</li>
+                </ul>
+                <!-- TODO: Replace with actual Freemius checkout URL -->
+                <a href="#" class="btn-primary">Buy Lifetime Access</a>
+            </div>
+        </div>
+        <div class="pricing-note">
+            <strong>&#10003; 30-day money-back guarantee.</strong> Try Pro risk-free. Full refund if you're not satisfied.
+        </div>
+    </section>
+
+    <section class="audience">
+        <div class="audience-inner">
+            <h2>Who uses PostFlow?</h2>
+            <p class="subtitle">Anyone who needs more control over content timing.</p>
+            <div class="audience-grid">
+                <div class="audience-card">
+                    <div class="emoji">&#128240;</div>
+                    <h3>Content Publishers</h3>
+                    <p>Schedule seasonal content to auto-unpublish. Move old news to archives automatically. Keep your site fresh without manual work.</p>
+                </div>
+                <div class="audience-card">
+                    <div class="emoji">&#128722;</div>
+                    <h3>eCommerce &amp; Marketing</h3>
+                    <p>Flash sale ending at midnight? Promotion copy that needs updating? Schedule it all and go to bed.</p>
+                </div>
+                <div class="audience-card">
+                    <div class="emoji">&#127963;&#65039;</div>
+                    <h3>WordPress Agencies</h3>
+                    <p>Set up client content schedules in advance. Automate editorial calendars. Less manual work, happier clients.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="faq" id="faq">
+        <h2>Frequently Asked Questions</h2>
+        <div class="faq-item">
+            <h3>Can't WordPress already schedule posts?</h3>
+            <p>WordPress can schedule posts to publish at a future date. That's it. PostFlow lets you schedule any status change (publish → draft, draft → pending, etc.), content updates, category moves, and more. It's the scheduling WordPress should have built in.</p>
+        </div>
+        <div class="faq-item">
+            <h3>How reliable is the scheduling?</h3>
+            <p>PostFlow uses WordPress's built-in cron system (wp-cron). For sites with regular traffic, this works perfectly. For maximum reliability, we recommend setting up a real server cron job — PostFlow's documentation shows you how in 2 minutes.</p>
+        </div>
+        <div class="faq-item">
+            <h3>Can I schedule bulk changes?</h3>
+            <p>With Pro, yes. Select multiple posts and schedule the same change for all of them at once. Great for seasonal content, promotions, or editorial calendar management.</p>
+        </div>
+        <div class="faq-item">
+            <h3>What if I need to cancel a scheduled change?</h3>
+            <p>Easy — just delete the scheduled event from PostFlow's dashboard. You can also edit any scheduled change before it executes.</p>
+        </div>
+        <div class="faq-item">
+            <h3>Will it slow down my site?</h3>
+            <p>No. PostFlow is extremely lightweight. Scheduled checks happen via wp-cron and add negligible overhead. Your frontend is completely unaffected.</p>
+        </div>
+        <div class="faq-item">
+            <h3>Is my data safe?</h3>
+            <p>PostFlow stores everything in your WordPress database. No external services, no cloud, no tracking. Your content and schedule data never leave your server.</p>
+        </div>
+    </section>
+
+    <section class="final-cta">
+        <h2>Automate your content workflow today</h2>
+        <p>Free to start. Install in 2 minutes. Stop doing manually what PostFlow does automatically.</p>
+        <a href="#" class="btn-white">&#128229; Get PostFlow Free</a>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 JennySaas &middot; <a href="mailto:jennysaas34@gmail.com">Contact</a> &middot; Built with &#10084;&#65039; in Europe</p>
+    </footer>
+</body>
+</html>
